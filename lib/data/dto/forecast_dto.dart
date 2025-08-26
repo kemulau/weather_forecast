@@ -80,7 +80,7 @@ class ForecastDto {
           as Map<String, dynamic>?,
       pollen: forecast['forecastday'] is List &&
               (forecast['forecastday'] as List).isNotEmpty
-          ? (forecast['forecastday'][0]['day']
+          ? ((forecast['forecastday'] as List)[0]['day']
                   as Map<String, dynamic>?)?['pollen']
               as Map<String, dynamic>?
           : null,
