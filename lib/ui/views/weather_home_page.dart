@@ -7,6 +7,8 @@ import 'package:weather_app/ui/widgets/error_container.dart';
 import 'package:weather_app/ui/widgets/forecast_list.dart';
 import 'package:weather_app/ui/widgets/weather_detail_card.dart';
 import 'package:weather_app/ui/widgets/weather_search_bar.dart';
+import 'package:weather_app/data/services/stormglass_api_service.dart';
+import 'package:weather_app/ui/widgets/surf_fish_panel.dart';
 
 class WeatherHomePage extends StatefulWidget {
   const WeatherHomePage({super.key, required this.title});
@@ -52,6 +54,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final sg = injector.get<StormGlassApiService>();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(
@@ -112,11 +115,16 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
                 // Lista de previsão
                 Watch(
                   (_) =>
-                      _viewController.forecast.value.isNotEmpty 
+                      _viewController.forecast.value.isNotEmpty
                           ? ForecastList(
                             forecasts: _viewController.forecast.value,
                           )
                           : const SizedBox.shrink(),
+                ),
+                SurfFishPanel(
+                  lat: -25.52,
+                  lng: -48.50,
+                  api: sg,
                 ),
               ],
             ),
