@@ -8,6 +8,7 @@ import 'package:weather_app/domain/usecases/weather_usecases_facade_contract.dar
 import 'package:weather_app/domain/usecases/weather_usecases_facade_impl.dart';
 import 'package:weather_app/domain/usecases/weather_usecases_impl.dart';
 import 'package:weather_app/ui/controllers/home_weather_view_model.dart';
+import 'package:weather_app/ui/controllers/home_page_controller.dart';
 
 final injector = AutoInjector();
 void setupDependencyInjection() {
@@ -32,6 +33,8 @@ void setupDependencyInjection() {
   injector.addSingleton<WeatherHomeViewController>(
     WeatherHomeViewController.new,
   );
+
+  setupHomePageInjection();
 
   injector.commit();
 

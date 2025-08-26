@@ -81,6 +81,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                   ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.waves),
                     title: const Text('Onda'),
                     trailing: Text(
                       '${current.waveHeight?.toStringAsFixed(1) ?? '--'} m',
@@ -89,6 +90,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                   ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.trending_up),
                     title: const Text('Swell'),
                     trailing: Text(
                       '${current.swellHeight?.toStringAsFixed(1) ?? '--'} m / '
@@ -98,6 +100,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                   ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.air),
                     title: const Text('Vento'),
                     trailing: Text(
                       '${current.windSpeed?.toStringAsFixed(1) ?? '--'} m/s'
@@ -107,6 +110,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                   ListTile(
                     dense: true,
                     contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.water),
                     title: const Text('Água'),
                     trailing: Text(
                       '${current.waterTemperature?.toStringAsFixed(1) ?? '--'} °C',
@@ -116,6 +120,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                   const Text('Sem dados atuais'),
                 const SizedBox(height: 8),
                 ExpansionTile(
+                  leading: const Icon(Icons.waves),
                   title: const Text('Próximas marés'),
                   children: tides
                       .map(
@@ -130,6 +135,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                       .toList(),
                 ),
                 ExpansionTile(
+                  leading: const Icon(Icons.access_time),
                   title: const Text('Janelas ideais'),
                   children: windows
                       .map(
