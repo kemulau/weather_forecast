@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:weather_app/core/dependencies/injection_dependencies.dart';
+import 'package:weather_app/core/di/injector.dart';
 import 'package:weather_app/core/theme/app_theme.dart';
 import 'package:weather_app/ui/views/weather_home_page.dart';
 
 void main() {
-  setupDependencyInjection();
   WidgetsFlutterBinding.ensureInitialized();
+  initInjector();
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
