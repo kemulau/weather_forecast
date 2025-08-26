@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:signals_flutter/signals_flutter.dart';
+import 'package:signals_flutter/signals_flutter.dart' hide AsyncState;
 import 'package:weather_app/core/patterns/command.dart';
 import 'package:weather_app/core/patterns/result.dart';
 import 'package:weather_app/domain/models/current_weather.dart';
