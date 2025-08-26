@@ -115,7 +115,7 @@ class WeatherHomeViewController {
   }
 }
 
-class _LoadCurrentCmd extends ParameterizedCommand<
+final class _LoadCurrentCmd extends ParameterizedCommand<
     CurrentWeather, Object, ({String q, bool aqi})> {
   final GetCurrentWeatherUseCase _useCase;
   _LoadCurrentCmd(this._useCase);
@@ -132,7 +132,7 @@ class _LoadCurrentCmd extends ParameterizedCommand<
   }
 }
 
-class _LoadForecastCmd extends ParameterizedCommand<
+final class _LoadForecastCmd extends ParameterizedCommand<
     Forecast,
     Object,
     ({String q, int days, bool aqi, bool alerts, bool pollen})> {
@@ -157,7 +157,7 @@ class _LoadForecastCmd extends ParameterizedCommand<
   }
 }
 
-class _SearchCmd
+final class _SearchCmd
     extends ParameterizedCommand<List<Location>, Object, String> {
   final SearchLocationsUseCase _useCase;
   _SearchCmd(this._useCase);
