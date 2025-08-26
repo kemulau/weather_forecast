@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:signals_flutter/signals_flutter.dart';
-import 'package:weather_app/core/dependencies/injection_dependencies.dart';
-import 'package:weather_app/ui/controllers/home_weather_view_model.dart';
+import 'package:weather_app/core/di/injector.dart';
+import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
 import 'package:weather_app/ui/widgets/current_weather_card.dart';
-import 'package:weather_app/ui/widgets/error_container.dart';
 import 'package:weather_app/ui/widgets/forecast_list.dart';
 import 'package:weather_app/ui/widgets/weather_detail_card.dart';
 import 'package:weather_app/ui/widgets/weather_search_bar.dart';
-import 'package:weather_app/data/services/stormglass_api_service.dart';
-import 'package:weather_app/ui/widgets/surf_fish_panel.dart';
 
 class WeatherHomePage extends StatefulWidget {
   const WeatherHomePage({super.key, required this.title});
@@ -27,6 +23,8 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   void initState() {
     super.initState();
     _viewController = injector.get<WeatherHomeViewController>();
+    _viewController.loadCurrent();
+    _viewController.loadForecast();
   }
 
   @override
@@ -47,14 +45,15 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
         ),
       );
 
-      await _viewController.searchWeatherByCity(cityName);
+      _viewController.city.value = cityName;
+      await _viewController.loadCurrent();
+      await _viewController.loadForecast();
       searchController.clear();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final sg = injector.get<StormGlassApiService>();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(
@@ -67,7 +66,6 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
         child: RefreshIndicator(
           onRefresh: () async {
             // Aqui você pode chamar o método de atualização de dados
-            // Exemplo: await _weatherController.refreshWeatherData();
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
@@ -76,56 +74,14 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
               children: <Widget>[
                 WeatherSearchBar(
                   controller: searchController,
+                  viewController: _viewController,
                   onSearch: _onSearch,
-                  isLoading: _viewController.isLoadingWeather,
                 ),
-                Watch(
-                  (_) =>
-                      _viewController.errorMessage.value != null
-                          ? ErrorContainer(
-                            onRetry: () {},
-                            errorMessage: _viewController.errorMessage.value!,
-                          )
-                          : const SizedBox.shrink(),
-                ),
-                //CurrentWeatherCard(weather: WeatherData.getCurrentWeather()),
-                // Clima atual
-                Watch(
-                  (_) =>
-                      _viewController.currentWeather.value != null
-                          ? CurrentWeatherCard(
-                            weather: _viewController.currentWeather.value!,
-                          )
-                          : const SizedBox.shrink(),
-                ),
+                CurrentWeatherCard(controller: _viewController),
                 const SizedBox(height: 16),
-                // WeatherDetailsCard(weather: WeatherData.getCurrentWeather()),
-                // Detalhes do clima
-                Watch(
-                  (_) =>
-                      _viewController.currentWeather.value != null 
-                          ? WeatherDetailsCard(
-                            weather: _viewController.currentWeather.value!,
-                          )
-                          : const SizedBox.shrink(),
-                ),
-
+                WeatherDetailsCard(controller: _viewController),
                 const SizedBox(height: 16),
-                // ForecastList(forecasts: WeatherData.getForecast()),
-                // Lista de previsão
-                Watch(
-                  (_) =>
-                      _viewController.forecast.value.isNotEmpty
-                          ? ForecastList(
-                            forecasts: _viewController.forecast.value,
-                          )
-                          : const SizedBox.shrink(),
-                ),
-                SurfFishPanel(
-                  lat: -25.52,
-                  lng: -48.50,
-                  api: sg,
-                ),
+                ForecastList(controller: _viewController),
               ],
             ),
           ),

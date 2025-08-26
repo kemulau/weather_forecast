@@ -1,8 +1,8 @@
 # Weather Forecast
 
-Aplicativo **Flutter** para consultar a previsão do tempo atual e dos próximos cinco dias.  
-Segue **arquitetura limpa** (camadas `core`, `data`, `domain` e `ui`) com **signals** e **commands** para gerenciamento reativo de estado.  
-As dependências são registradas via **auto_injector** e o serviço de dados consome a **API OpenWeatherMap**.
+Aplicativo **Flutter** para consultar a previsão do tempo atual e dos próximos dias utilizando a **WeatherAPI**.
+Segue **arquitetura limpa** (camadas `core`, `data`, `domain` e `ui`) com **signals** e **commands** para gerenciamento reativo de estado.
+As dependências são registradas via **auto_injector** e o serviço de dados pode consumir a API real ou dados *mock*.
 
 ---
 
@@ -26,8 +26,8 @@ As dependências são registradas via **auto_injector** e o serviço de dados co
   `AutoInjector` registra serviços, repositórios, *use cases* e o controlador da tela inicial.
 
 - **Serviços e Repositórios**  
-  - `WeatherApiService` faz chamadas HTTP usando `ApiHttpClientService`.  
-  - `WeatherRepository` abstrai o serviço e organiza os dados.
+  - `WeatherRemoteDataSource` consome a WeatherAPI via `ApiHttpClientService` e `WeatherMockDataSource` fornece dados estáticos.
+  - `WeatherRepositoryImpl` decide entre remoto e mock, expondo modelos de domínio.
 
 - **Use Cases / Facade**  
   A camada de domínio expõe *use cases* (ex.: `GetCurrentWeatherUseCase`, `GetForecastUseCase`) e uma *facade* para orquestrar chamadas.
@@ -64,36 +64,26 @@ lib/
 
 ---
 
-## 🔑 Configuração da API
+## 🔑 Chave e documentação da WeatherAPI
 
-Edite o arquivo:
+1. Crie uma conta gratuita em [WeatherAPI](https://www.weatherapi.com/signup.aspx) e gere sua chave.
+2. Explore os endpoints no [API Explorer](https://www.weatherapi.com/api-explorer.aspx) ou consulte a [documentação/Swagger](https://www.weatherapi.com/docs/).
 
-```
-lib/core/config/api_config.dart
-```
-
-Substitua:
-
-```dart
-YOUR_API_KEY_HERE
-```
-
-pela sua chave da **OpenWeatherMap** (ou outra API).  
-
-> ℹ️ Observação: `ApiHttpClientService` atualmente retorna dados *mock* para facilitar testes locais.  
-Remova o *mock* quando configurar a API real.
+A chave é lida em tempo de execução via `--dart-define=WEATHER_API_KEY` no arquivo [`ApiConfig`](lib/core/config/api_config.dart).
 
 ---
 
 ## ▶️ Como Executar
 
-1. Instale o **Flutter SDK** (versão compatível com `sdk: ^3.7.2`).  
+1. Instale o **Flutter SDK** (versão compatível com `sdk: ^3.7.2`).
 2. Na raiz do projeto, rode:
 
 ```bash
 flutter pub get
-flutter run
+flutter run --dart-define=WEATHER_API_KEY=SEU_TOKEN --dart-define=USE_MOCK=false
 ```
+
+> Use `--dart-define=USE_MOCK=true` para testar com os dados estáticos.
 
 ---
 

@@ -1,84 +1,90 @@
 import 'package:flutter/material.dart';
-import 'package:weather_app/domain/models/weather.dart';
+import 'package:signals_flutter/signals_flutter.dart';
+import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
+import 'package:weather_app/core/errors/app_exception.dart';
 
 class WeatherDetailsCard extends StatelessWidget {
-  final Weather weather;
-  
+  final WeatherHomeViewController controller;
+
   const WeatherDetailsCard({
     super.key,
-    required this.weather,
+    required this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Detalhes do Clima",
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+    return Watch((_) {
+      final state = controller.currentState.value;
+      if (state.isLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (state.error != null) {
+        final err = state.error!;
+        String message = err.toString();
+        if (err is AppException) {
+          message = 'error.code ${err.code}: ${err.userMessage}';
+        }
+        return Column(
+          children: [
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: () => controller.loadCurrent(),
+              child: const Text('Tentar novamente'),
             ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDetailItem(
-                  context,
-                  icon: Icons.compress,
-                  title: "Pressão",
-                  value: "${weather.pressure.toInt()} hPa",
+          ],
+        );
+      }
+      final weather = state.data;
+      if (weather == null) return const SizedBox.shrink();
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Detalhes do Clima",
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDetailItem(
+                    context,
+                    icon: Icons.water_drop,
+                    title: "Umidade",
+                    value: "${weather.humidity}%",
+                  ),
                 ),
-              ),
-              Expanded(
-                child: _buildDetailItem(
-                  context,
-                  icon: Icons.water_drop,
-                  title: "Umidade",
-                  value: "${weather.humidity.toInt()}%",
+                Expanded(
+                  child: _buildDetailItem(
+                    context,
+                    icon: Icons.air,
+                    title: "Vento",
+                    value: "${weather.windKph} km/h",
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: _buildDetailItem(
-                  context,
-                  icon: Icons.air,
-                  title: "Vento",
-                  value: "${weather.windSpeed.toInt()} km/h",
-                ),
-              ),
-              Expanded(
-                child: _buildDetailItem(
-                  context,
-                  icon: Icons.thermostat,
-                  title: "Descrição",
-                  value: weather.description,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+              ],
+            ),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildDetailItem(
