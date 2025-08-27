@@ -7,6 +7,8 @@ class CurrentWeatherDto {
   final String iconUrl;
   final int humidity;
   final double windKph;
+  final double lat;
+  final double lon;
 
   const CurrentWeatherDto({
     required this.locationName,
@@ -15,6 +17,8 @@ class CurrentWeatherDto {
     required this.iconUrl,
     required this.humidity,
     required this.windKph,
+    required this.lat,
+    required this.lon,
   });
 
   factory CurrentWeatherDto.fromJson(Map<String, dynamic> j) {
@@ -28,6 +32,8 @@ class CurrentWeatherDto {
       iconUrl: 'https:${condition['icon']}',
       humidity: (current['humidity'] as num?)?.toInt() ?? 0,
       windKph: (current['wind_kph'] as num?)?.toDouble() ?? 0,
+      lat: (location['lat'] as num).toDouble(),
+      lon: (location['lon'] as num).toDouble(),
     );
   }
 
@@ -38,6 +44,8 @@ class CurrentWeatherDto {
         iconUrl: iconUrl,
         humidity: humidity,
         windKph: windKph,
+        lat: lat,
+        lon: lon,
       );
 
   static CurrentWeatherDto mock({String locationName = 'Mock City'}) =>
@@ -49,5 +57,7 @@ class CurrentWeatherDto {
             'https://cdn.weatherapi.com/weather/64x64/day/113.png',
         humidity: 50,
         windKph: 10,
+        lat: 0,
+        lon: 0,
       );
 }
