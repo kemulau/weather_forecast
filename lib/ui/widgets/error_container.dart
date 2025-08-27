@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather_app/l10n/app_localizations.dart';
 
 class ErrorContainer extends StatelessWidget {
   String errorMessage;
@@ -26,7 +27,7 @@ class ErrorContainer extends StatelessWidget {
               style: TextStyle(color: Colors.orange.shade800),
             ),
           ),
-          TextButton(onPressed: onRetry, child: const Text('Tentar novamente')),
+          TextButton(onPressed: onRetry, child: Text(AppLocalizations.of(context).tryAgain)),
         ],
       ),
     );

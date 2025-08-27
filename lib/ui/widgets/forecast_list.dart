@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
+import 'package:weather_app/core/errors/app_exception.dart';
 import 'package:weather_app/domain/models/air_quality.dart';
 import 'package:weather_app/domain/models/forecast.dart';
 import 'package:weather_app/domain/models/pollen.dart';
+import 'package:weather_app/l10n/app_localizations.dart';
 import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
-import 'package:weather_app/core/errors/app_exception.dart';
 
 class ForecastList extends StatelessWidget {
   final WeatherHomeViewController controller;
@@ -15,6 +16,7 @@ class ForecastList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Watch((_) {
       final state = controller.forecastState.value;
+      final l10n = AppLocalizations.of(context);
       if (state.isLoading) {
         return const Center(child: CircularProgressIndicator());
       }
@@ -22,7 +24,7 @@ class ForecastList extends StatelessWidget {
         final err = state.error!;
         String message = err.toString();
         if (err is AppException) {
-          message = 'error.code ${err.code}: ${err.userMessage}';
+          message = '${l10n.errorPrefix} ${err.userMessage}';
         }
         return Column(
           children: [
@@ -30,7 +32,7 @@ class ForecastList extends StatelessWidget {
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () => controller.loadForecast(),
-              child: const Text('Tentar novamente'),
+              child: Text(l10n.tryAgain),
             ),
           ],
         );
@@ -43,7 +45,7 @@ class ForecastList extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              "Previsão dos próximos dias",
+              l10n.forecastNextDays,
               style: Theme.of(context)
                   .textTheme
                   .titleLarge
@@ -146,36 +148,38 @@ class ForecastList extends StatelessWidget {
   }
 
   Widget _buildAqiSection(BuildContext context, AirQuality aqi) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Qualidade do ar',
+            l10n.airQuality,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          Text('US EPA Index: ${aqi.usEpaIndex ?? '-'}'),
+          Text('${l10n.usEpaIndex} ${aqi.usEpaIndex ?? '-'}'),
         ],
       ),
     );
   }
 
   Widget _buildPollenSection(BuildContext context, Pollen pollen) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Pólen',
+            l10n.pollen,
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 8),
-          Text('Árvores: ${pollen.tree ?? '-'}'),
-          Text('Ervas: ${pollen.weed ?? '-'}'),
-          Text('Grama: ${pollen.grass ?? '-'}'),
+          Text('${l10n.trees} ${pollen.tree ?? '-'}'),
+          Text('${l10n.herbs} ${pollen.weed ?? '-'}'),
+          Text('${l10n.grass} ${pollen.grass ?? '-'}'),
         ],
       ),
     );
