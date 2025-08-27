@@ -2,6 +2,16 @@ import 'package:weather_app/domain/models/air_quality.dart';
 import 'package:weather_app/domain/models/forecast.dart';
 import 'package:weather_app/domain/models/pollen.dart';
 
+class PollenDto {
+  final int? grass, tree, weed;
+  const PollenDto({this.grass, this.tree, this.weed});
+  factory PollenDto.fromJson(Map<String, dynamic> j) => PollenDto(
+        grass: (j['grass_pollen'] as num?)?.toInt(),
+        tree: (j['tree_pollen'] as num?)?.toInt(),
+        weed: (j['weed_pollen'] as num?)?.toInt(),
+      );
+}
+
 class ForecastDayDto {
   final DateTime date;
   final double minTempC;
@@ -9,6 +19,7 @@ class ForecastDayDto {
   final double avgTempC;
   final String conditionText;
   final String iconUrl;
+  final PollenDto? pollen;
 
   const ForecastDayDto({
     required this.date,
@@ -17,18 +28,21 @@ class ForecastDayDto {
     required this.avgTempC,
     required this.conditionText,
     required this.iconUrl,
+    this.pollen,
   });
 
   factory ForecastDayDto.fromJson(Map<String, dynamic> j) {
-    final day = j['day'] as Map<String, dynamic>;
-    final condition = day['condition'] as Map<String, dynamic>;
+    final d = j['day'] as Map<String, dynamic>;
+    final condition = d['condition'] as Map<String, dynamic>;
+    final pj = d['pollen'] as Map<String, dynamic>?;
     return ForecastDayDto(
       date: DateTime.parse(j['date'] as String),
-      minTempC: (day['mintemp_c'] as num).toDouble(),
-      maxTempC: (day['maxtemp_c'] as num).toDouble(),
-      avgTempC: (day['avgtemp_c'] as num).toDouble(),
+      minTempC: (d['mintemp_c'] as num).toDouble(),
+      maxTempC: (d['maxtemp_c'] as num).toDouble(),
+      avgTempC: (d['avgtemp_c'] as num).toDouble(),
       conditionText: condition['text'] as String,
       iconUrl: 'https:${condition['icon']}',
+      pollen: pj != null ? PollenDto.fromJson(pj) : null,
     );
   }
 
@@ -56,7 +70,7 @@ class ForecastDto {
   final List<ForecastDayDto> days;
   final Map<String, dynamic>? alerts;
   final Map<String, dynamic>? aqi;
-  final Map<String, dynamic>? pollen;
+  final PollenDto? pollen;
 
   const ForecastDto({
     required this.locationName,
@@ -72,18 +86,14 @@ class ForecastDto {
     final dayList = (forecast['forecastday'] as List<dynamic>)
         .map((e) => ForecastDayDto.fromJson(e as Map<String, dynamic>))
         .toList();
+    final pollen = dayList.isNotEmpty ? dayList[0].pollen : null;
     return ForecastDto(
       locationName: location['name'] as String,
       days: dayList,
       alerts: j['alerts'] as Map<String, dynamic>?,
       aqi: (j['current'] as Map<String, dynamic>?)?['air_quality']
           as Map<String, dynamic>?,
-      pollen: forecast['forecastday'] is List &&
-              (forecast['forecastday'] as List).isNotEmpty
-          ? ((forecast['forecastday'] as List)[0]['day']
-                  as Map<String, dynamic>?)?['pollen']
-              as Map<String, dynamic>?
-          : null,
+      pollen: pollen,
     );
   }
 
@@ -106,9 +116,9 @@ class ForecastDto {
     final m = pollen;
     if (m == null) return null;
     return Pollen(
-      tree: (m['tree_pollen'] as num?)?.toInt(),
-      weed: (m['weed_pollen'] as num?)?.toInt(),
-      grass: (m['grass_pollen'] as num?)?.toInt(),
+      tree: m.tree,
+      weed: m.weed,
+      grass: m.grass,
     );
   }
 
