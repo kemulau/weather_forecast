@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:weather_app/data/services/stormglass_api_service.dart';
-import 'package:weather_app/ui/controllers/surf_fish_controller.dart';
 import 'package:weather_app/domain/models/marine_models.dart';
+import 'package:weather_app/l10n/app_localizations.dart';
+import 'package:weather_app/ui/controllers/surf_fish_controller.dart';
 
 class SurfFishPanel extends StatefulWidget {
   final double lat;
@@ -49,11 +50,12 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
     )>(
       future: _future,
       builder: (context, snapshot) {
+        final l10n = AppLocalizations.of(context);
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Erro: ${snapshot.error}'));
+          return Center(child: Text('${l10n.errorPrefix} ${snapshot.error}'));
         }
         if (!snapshot.hasData) {
           return const SizedBox.shrink();
@@ -73,7 +75,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Condições atuais',
+                  l10n.currentConditions,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 8),
@@ -82,7 +84,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.waves),
-                    title: const Text('Onda'),
+                    title: Text(l10n.wave),
                     trailing: Text(
                       '${current.waveHeight?.toStringAsFixed(1) ?? '--'} m',
                     ),
@@ -91,7 +93,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.trending_up),
-                    title: const Text('Swell'),
+                    title: Text(l10n.swell),
                     trailing: Text(
                       '${current.swellHeight?.toStringAsFixed(1) ?? '--'} m / '
                       '${current.swellPeriod?.toStringAsFixed(0) ?? '--'} s',
@@ -101,7 +103,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.air),
-                    title: const Text('Vento'),
+                    title: Text(l10n.wind),
                     trailing: Text(
                       '${current.windSpeed?.toStringAsFixed(1) ?? '--'} m/s'
                       '${current.windDirection != null ? ' (${current.windDirection!.toStringAsFixed(0)}°)' : ''}',
@@ -111,21 +113,21 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                     dense: true,
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.water),
-                    title: const Text('Água'),
+                    title: Text(l10n.water),
                     trailing: Text(
                       '${current.waterTemperature?.toStringAsFixed(1) ?? '--'} °C',
                     ),
                   ),
                 ] else
-                  const Text('Sem dados atuais'),
+                  Text(l10n.noCurrentData),
                 const SizedBox(height: 8),
                 ExpansionTile(
                   leading: const Icon(Icons.waves),
-                  title: const Text('Próximas marés'),
+                  title: Text(l10n.nextTides),
                   children: tides
                       .map(
                         (t) => ListTile(
-                          title: Text(t.type == 'high' ? 'Alta' : 'Baixa'),
+                          title: Text(t.type == 'high' ? l10n.tideHigh : l10n.tideLow),
                           subtitle: Text(_formatTime(t.time)),
                           trailing: t.height != null
                               ? Text('${t.height!.toStringAsFixed(2)} m')
@@ -136,7 +138,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                 ),
                 ExpansionTile(
                   leading: const Icon(Icons.access_time),
-                  title: const Text('Janelas ideais'),
+                  title: Text(l10n.idealWindows),
                   children: windows
                       .map(
                         (w) => ListTile(

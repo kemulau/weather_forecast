@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:weather_app/core/errors/app_exception.dart';
+import 'package:weather_app/l10n/app_localizations.dart';
 import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
 
 class CurrentWeatherCard extends StatelessWidget {
@@ -15,6 +16,7 @@ class CurrentWeatherCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Watch((_) {
       final state = controller.currentState.value;
+      final l10n = AppLocalizations.of(context);
       if (state.isLoading) {
         return const Center(child: CircularProgressIndicator());
       }
@@ -22,7 +24,7 @@ class CurrentWeatherCard extends StatelessWidget {
         final err = state.error!;
         String message = err.toString();
         if (err is AppException) {
-          message = 'error.code ${err.code}: ${err.userMessage}';
+          message = '${l10n.errorPrefix} ${err.userMessage}';
         }
         return Column(
           children: [
@@ -30,7 +32,7 @@ class CurrentWeatherCard extends StatelessWidget {
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () => controller.loadCurrent(),
-              child: const Text('Tentar novamente'),
+              child: Text(l10n.tryAgain),
             ),
           ],
         );

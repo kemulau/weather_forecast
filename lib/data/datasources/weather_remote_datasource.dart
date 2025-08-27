@@ -30,7 +30,11 @@ class WeatherApiRemoteDataSource implements WeatherRemoteDataSource {
 
   Uri _buildUri(String path, Map<String, String> params) {
     final base = ApiConfig.baseUrl;
-    final query = {'key': ApiConfig.apiKey, ...params};
+    final query = {
+      'key': ApiConfig.apiKey,
+      'lang': ApiConfig.language,
+      ...params,
+    };
     return Uri.parse('$base$path').replace(queryParameters: query);
   }
 

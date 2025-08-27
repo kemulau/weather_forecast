@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:weather_app/domain/models/location.dart';
+import 'package:weather_app/l10n/app_localizations.dart';
 import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
 
 class WeatherSearchBar extends StatelessWidget {
@@ -17,6 +18,7 @@ class WeatherSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         Container(
@@ -35,7 +37,7 @@ class WeatherSearchBar extends StatelessWidget {
           child: TextField(
             controller: controller,
             decoration: InputDecoration(
-              hintText: "Digite o nome da cidade",
+              hintText: l10n.hintCityName,
               prefixIcon: Icon(
                 Icons.search,
                 color: Theme.of(context).colorScheme.primary,

@@ -8,7 +8,7 @@ abstract class AppException implements Exception {
   String get userMessage;
 
   @override
-  String toString() => 'error.code $code: $message';
+  String toString() => 'erro $code: $message';
 }
 
 class ApiKeyMissing extends AppException {

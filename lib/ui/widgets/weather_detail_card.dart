@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
-import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
 import 'package:weather_app/core/errors/app_exception.dart';
+import 'package:weather_app/l10n/app_localizations.dart';
+import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
 
 class WeatherDetailsCard extends StatelessWidget {
   final WeatherHomeViewController controller;
@@ -15,6 +16,7 @@ class WeatherDetailsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Watch((_) {
       final state = controller.currentState.value;
+      final l10n = AppLocalizations.of(context);
       if (state.isLoading) {
         return const Center(child: CircularProgressIndicator());
       }
@@ -22,7 +24,7 @@ class WeatherDetailsCard extends StatelessWidget {
         final err = state.error!;
         String message = err.toString();
         if (err is AppException) {
-          message = 'error.code ${err.code}: ${err.userMessage}';
+          message = '${l10n.errorPrefix} ${err.userMessage}';
         }
         return Column(
           children: [
@@ -30,7 +32,7 @@ class WeatherDetailsCard extends StatelessWidget {
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () => controller.loadCurrent(),
-              child: const Text('Tentar novamente'),
+              child: Text(l10n.tryAgain),
             ),
           ],
         );
@@ -55,7 +57,7 @@ class WeatherDetailsCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Detalhes do Clima",
+              l10n.weatherDetailsTitle,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
@@ -67,7 +69,7 @@ class WeatherDetailsCard extends StatelessWidget {
                   child: _buildDetailItem(
                     context,
                     icon: Icons.water_drop,
-                    title: "Umidade",
+                    title: l10n.humidity,
                     value: "${weather.humidity}%",
                   ),
                 ),
@@ -75,7 +77,7 @@ class WeatherDetailsCard extends StatelessWidget {
                   child: _buildDetailItem(
                     context,
                     icon: Icons.air,
-                    title: "Vento",
+                    title: l10n.wind,
                     value: "${weather.windKph} km/h",
                   ),
                 ),

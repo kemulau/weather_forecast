@@ -12,6 +12,9 @@ class ApiConfig {
     'WEATHER_API_KEY',
     defaultValue: 'CHANGE_ME',
   );
+
+  /// Código de idioma para respostas da WeatherAPI.
+  static const String language = 'pt';
 }
 
 /// Define se os data sources devem usar dados estáticos ao invés da API real.

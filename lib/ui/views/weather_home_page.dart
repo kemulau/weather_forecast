@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:weather_app/core/di/injector.dart';
+import 'package:weather_app/l10n/app_localizations.dart';
 import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
 import 'package:weather_app/ui/widgets/current_weather_card.dart';
 import 'package:weather_app/ui/widgets/forecast_list.dart';
@@ -39,7 +40,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
       // Mostrar indicador de busca
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Buscando dados para "$cityName"...'),
+          content: Text(l10n.searchingCity(cityName)),
           backgroundColor: Theme.of(context).colorScheme.primary,
           duration: const Duration(seconds: 2),
         ),
@@ -54,6 +55,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(
