@@ -69,11 +69,11 @@ class WeatherApiRemoteDataSource implements WeatherRemoteDataSource {
   Future<CurrentWeatherDto> getCurrent(String q, {bool aqi = false}) async {
     final uri = _buildUri('/current.json', {'q': q, 'aqi': aqi ? 'yes' : 'no'});
     final response = await _client.get(uri);
-    final data = jsonDecode(response.body);
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode != 200) {
       _throwFromResponse(response.statusCode, data);
     }
-    return CurrentWeatherDto.fromJson(data as Map<String, dynamic>);
+    return CurrentWeatherDto.fromJson(data);
   }
 
   @override
@@ -95,11 +95,11 @@ class WeatherApiRemoteDataSource implements WeatherRemoteDataSource {
       'pollen': pollen ? 'yes' : 'no',
     });
     final response = await _client.get(uri);
-    final data = jsonDecode(response.body);
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode != 200) {
       _throwFromResponse(response.statusCode, data);
     }
-    return ForecastDto.fromJson(data as Map<String, dynamic>);
+    return ForecastDto.fromJson(data);
   }
 
   @override
