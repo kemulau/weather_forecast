@@ -41,6 +41,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
     cityName = searchController.text.trim();
     if (cityName.isNotEmpty) {
       // Mostrar indicador de busca
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.searchingCity(cityName)),
@@ -87,43 +88,14 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(
-          context,
-        ).colorScheme.primaryContainer.withValues(alpha: 0.1),
-        title: Text(widget.title),
-      ),
-      body: SafeArea(
-        // use refresh indicator para permitir que o usuário atualize os dados puxando para baixo
-        child: RefreshIndicator(
-          onRefresh: () async {
-            // Aqui você pode chamar o método de atualização de dados
-          },
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                WeatherSearchBar(
-                  controller: searchController,
-                  viewController: _viewController,
-                  onSearch: _onSearch,
-                ),
-                CurrentWeatherCard(controller: _viewController),
-                const SizedBox(height: 16),
-                WeatherDetailsCard(controller: _viewController),
-                const SizedBox(height: 16),
-                ForecastList(controller: _viewController),
-              ],
-            ),
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor:
-              Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.1),
+          backgroundColor: Theme.of(context)
+              .colorScheme
+              .primaryContainer
+              .withValues(alpha: 0.1),
           title: Text(widget.title),
           bottom: const TabBar(
             tabs: [

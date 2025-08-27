@@ -96,6 +96,15 @@ flutter run --dart-define=WEATHER_API_KEY=SEU_TOKEN --dart-define=USE_MOCK=false
 
 ---
 
+## 🚧 Pendências
+
+- Adicionar testes unitários e de widget.
+- Configurar `flutter analyze` e `flutter test` em pipeline de CI.
+- Documentar geração de arquivos de internacionalização (l10n).
+- Completar documentação da aba de surf/pesca.
+
+---
+
 ## 📜 Licença
 
 Este projeto é de uso livre para **estudos**.  
