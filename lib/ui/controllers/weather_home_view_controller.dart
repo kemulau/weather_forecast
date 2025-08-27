@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:signals_flutter/signals_flutter.dart' hide AsyncState;
+import 'package:signals_flutter/signals_flutter.dart';
 import 'package:weather_app/core/patterns/command.dart';
 import 'package:weather_app/core/patterns/result.dart';
 import 'package:weather_app/domain/models/current_weather.dart';
@@ -10,7 +10,7 @@ import 'package:weather_app/domain/usecases/get_current_weather_usecase.dart';
 import 'package:weather_app/domain/usecases/get_forecast_usecase.dart';
 import 'package:weather_app/domain/usecases/search_locations_usecase.dart';
 
-import 'async_state.dart';
+import 'ui_async_state.dart';
 
 class WeatherHomeViewController {
   final GetCurrentWeatherUseCase _getCurrent;
@@ -29,9 +29,9 @@ class WeatherHomeViewController {
 
   final city = signal<String>('Curitiba');
   final currentState =
-      signal<AsyncState<CurrentWeather>>(const AsyncState.initial());
+      signal<UiAsyncState<CurrentWeather>>(const UiAsyncState.initial());
   final forecastState =
-      signal<AsyncState<Forecast>>(const AsyncState.initial());
+      signal<UiAsyncState<Forecast>>(const UiAsyncState.initial());
   final suggestions = signal<List<Location>>([]);
 
   late final loadCurrentCmd = _LoadCurrentCmd(_getCurrent);
@@ -47,13 +47,14 @@ class WeatherHomeViewController {
   void _initCommands() {
     effect(() {
       if (loadCurrentCmd.isExecuting.value) {
-        currentState.value = const AsyncState.loading();
+        currentState.value = const UiAsyncState.loading();
       } else {
         final res = loadCurrentCmd.result.value;
         if (res != null) {
           res.fold(
-            onSuccess: (data) => currentState.value = AsyncState.data(data),
-            onFailure: (err) => currentState.value = AsyncState.error(err),
+            onSuccess: (data) =>
+                currentState.value = UiAsyncState.data(data),
+            onFailure: (err) => currentState.value = UiAsyncState.error(err),
           );
         }
       }
@@ -61,13 +62,15 @@ class WeatherHomeViewController {
 
     effect(() {
       if (loadForecastCmd.isExecuting.value) {
-        forecastState.value = const AsyncState.loading();
+        forecastState.value = const UiAsyncState.loading();
       } else {
         final res = loadForecastCmd.result.value;
         if (res != null) {
           res.fold(
-            onSuccess: (data) => forecastState.value = AsyncState.data(data),
-            onFailure: (err) => forecastState.value = AsyncState.error(err),
+            onSuccess: (data) =>
+                forecastState.value = UiAsyncState.data(data),
+            onFailure: (err) =>
+                forecastState.value = UiAsyncState.error(err),
           );
         }
       }
