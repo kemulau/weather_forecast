@@ -27,7 +27,7 @@ class WeatherHomeViewController {
     _initCommands();
   }
 
-  final city = signal<String>('Curitiba');
+  final city = signal<String>('Matinhos, PR');
   final currentState =
       signal<UiAsyncState<CurrentWeather>>(const UiAsyncState.initial());
   final forecastState =

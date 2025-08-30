@@ -1,4 +1,6 @@
-import 'package:weather_app/data/services/stormglass_api_service.dart';
+import 'package:weather_app/domain/models/marine_models.dart';
+import 'package:weather_app/domain/usecases/get_marine_hours_usecase.dart';
+import 'package:weather_app/domain/usecases/get_tide_extremes_usecase.dart';
 import 'package:weather_app/domain/models/marine_models.dart';
 
 class SurfFishWindow {
@@ -16,9 +18,13 @@ class SurfFishWindow {
 }
 
 class SurfFishController {
-  final StormGlassApiService _api;
+  final GetMarineHoursUseCase _getMarineHours;
+  final GetTideExtremesUseCase _getTideExtremes;
 
-  SurfFishController(this._api);
+  SurfFishController(
+    this._getMarineHours,
+    this._getTideExtremes,
+  );
 
   Future<(
     List<MarineHour>,
@@ -29,27 +35,8 @@ class SurfFishController {
     final start = DateTime.utc(now.year, now.month, now.day, now.hour);
     final end = start.add(const Duration(hours: 48));
 
-    const params = [
-      'waveHeight',
-      'swellHeight',
-      'swellPeriod',
-      'windSpeed',
-      'windDirection',
-      'waterTemperature',
-    ];
-
-    final marineJson =
-        await _api.getMarinePoint(lat, lng, start, end, params);
-    final hoursJson = marineJson['hours'] as List<dynamic>? ?? [];
-    final marineHours = hoursJson
-        .map((e) => MarineHour.fromJson(e as Map<String, dynamic>))
-        .toList();
-
-    final tideJson = await _api.getTideExtremes(lat, lng, start, end);
-    final tidesJson = tideJson['data'] as List<dynamic>? ?? [];
-    final tideExtremes = tidesJson
-        .map((e) => TideExtreme.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final marineHours = await _getMarineHours(lat, lng, start, end);
+    final tideExtremes = await _getTideExtremes(lat, lng, start, end);
 
     final windows = _calculateWindows(marineHours, tideExtremes);
 
@@ -74,10 +61,13 @@ class SurfFishController {
       double? bestScore;
       String? bestLabel;
 
+      // Definição dinâmica do limiar para pesca quando não há marés
+      final minFish = tides.isEmpty ? 2 : 3;
+
       if (surfScore >= fishScore && surfScore >= 3) {
         bestScore = surfScore;
         bestLabel = 'SURF';
-      } else if (fishScore > surfScore && fishScore >= 3) {
+      } else if (fishScore > surfScore && fishScore >= minFish) {
         bestScore = fishScore;
         bestLabel = 'PESCA';
       }

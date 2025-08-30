@@ -1,8 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:weather_app/core/di/injector.dart';
 import 'package:weather_app/l10n/app_localizations.dart';
-import 'package:weather_app/data/services/stormglass_api_service.dart';
+import 'package:weather_app/data/services/marine_api_service.dart';
 import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
 import 'package:weather_app/ui/widgets/current_weather_card.dart';
 import 'package:weather_app/ui/widgets/forecast_list.dart';
@@ -22,6 +23,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   late WeatherHomeViewController _viewController;
   // Controller para campo de busca
   final searchController = TextEditingController();
+  Timer? _autoTimer;
 
   @override
   void initState() {
@@ -29,10 +31,18 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
     _viewController = injector.get<WeatherHomeViewController>();
     _viewController.loadCurrent();
     _viewController.loadForecast();
+
+    // Atualização automática a cada 30 minutos
+    _autoTimer?.cancel();
+    _autoTimer = Timer.periodic(const Duration(minutes: 30), (_) async {
+      await _viewController.loadCurrent();
+      await _viewController.loadForecast();
+    });
   }
 
   @override
   void dispose() {
+    _autoTimer?.cancel();
     searchController.dispose();
     super.dispose();
   }
@@ -62,7 +72,8 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
       // use refresh indicator para permitir que o usuário atualize os dados puxando para baixo
       child: RefreshIndicator(
         onRefresh: () async {
-          // Aqui você pode chamar o método de atualização de dados
+          await _viewController.loadCurrent();
+          await _viewController.loadForecast();
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -116,10 +127,24 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
               if (weather == null) {
                 return const SizedBox.shrink();
               }
-              return SurfFishPanel(
-                lat: weather.lat,
-                lng: weather.lon,
-                api: injector.get<StormGlassApiService>(),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                    child: WeatherSearchBar(
+                      controller: searchController,
+                      viewController: _viewController,
+                      onSearch: _onSearch,
+                    ),
+                  ),
+                  Expanded(
+                    child: SurfFishPanel(
+                      lat: weather.lat,
+                      lng: weather.lon,
+                    ),
+                  ),
+                ],
               );
             }),
           ],

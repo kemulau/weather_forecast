@@ -36,8 +36,11 @@ class AppLocalizations {
   String get swell => _get('swell');
   String get water => _get('water');
   String get noCurrentData => _get('noCurrentData');
+  String get noMarineData => _get('noMarineData');
   String get nextTides => _get('nextTides');
+  String get noTideData => _get('noTideData');
   String get idealWindows => _get('idealWindows');
+  String get noWindows => _get('noWindows');
   String get tideHigh => _get('tideHigh');
   String get tideLow => _get('tideLow');
   String get forecastNextDays => _get('forecastNextDays');

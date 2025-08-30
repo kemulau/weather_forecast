@@ -1,113 +1,131 @@
-# Weather Forecast
+# Weather Forecast 🌦️
 
-Aplicativo **Flutter** para consultar a previsão do tempo atual e dos próximos dias utilizando a **WeatherAPI**.
-Segue **arquitetura limpa** (camadas `core`, `data`, `domain` e `ui`) com **signals** e **commands** para gerenciamento reativo de estado.
-As dependências são registradas via **auto_injector** e o serviço de dados pode consumir a API real ou dados *mock*.
+> App Flutter com duas abas: “Clima” (WeatherAPI) e “Surf/Pesca” (Open‑Meteo). Arquitetura limpa, DI com AutoInjector, estado reativo com Signals + Commands. Cidade inicial: Matinhos, PR.
 
 ---
 
-## 📌 Visão Geral
+## ✨ Funcionalidades
 
-| Recurso                  | Descrição                                                                 |
-|--------------------------|---------------------------------------------------------------------------|
-| **Busca por cidade**     | Permite digitar o nome da cidade e obter clima atual + previsão.          |
-| **Busca por coordenadas**| Interface de fachada para pesquisas por latitude/longitude.               |
-| **Dados de exemplo**     | Quando a API não responde, retorna dados *mock* para manter a interface.  |
-| **Temas claro/escuro**   | Definidos em `lightTheme` e `darkTheme` com **Material 3**.               |
-
----
-
-## 🏗 Arquitetura
-
-- **Entrada**  
-  Arquivo `lib/main.dart` inicializa as dependências, configura o `MaterialApp`, aplica os temas claro/escuro e define a página inicial.
-
-- **Injeção de Dependências**  
-  `AutoInjector` registra serviços, repositórios, *use cases* e o controlador da tela inicial.
-
-- **Serviços e Repositórios**  
-  - `WeatherRemoteDataSource` consome a WeatherAPI via `ApiHttpClientService` e `WeatherMockDataSource` fornece dados estáticos.
-  - `WeatherRepositoryImpl` decide entre remoto e mock, expondo modelos de domínio.
-
-- **Use Cases / Facade**  
-  A camada de domínio expõe *use cases* (ex.: `GetCurrentWeatherUseCase`, `GetForecastUseCase`) e uma *facade* para orquestrar chamadas.
-
-- **UI (MVVM)**  
-  `WeatherHomeViewController` utiliza **signals_flutter** e comandos parametrizados para acionar os *use cases* e atualizar a interface de forma reativa.
-
-- **Padrão Command**  
-  Implementação de comandos com estado reativo, permitindo composição e cancelamento de execuções.
+| 💡 Recurso | 🚀 Descrição |
+|---|---|
+| 🔎 Busca por cidade | Campo de busca nas duas abas com feedback de carregamento |
+| 🌡️ Clima atual e previsão | Temperatura, detalhes e previsão pela WeatherAPI |
+| 🌊 Condições do mar | Onda, ondulação, período, vento e temperatura da água (Open‑Meteo) |
+| 🌗 Marés | Extremos quando disponíveis; fallback por máximos/mínimos |
+| 🔄 Atualização | Pull‑to‑refresh e auto‑refresh a cada 30 minutos |
+| 🌍 i18n | Interface em pt‑BR com mensagens amigáveis |
 
 ---
 
-## 📂 Estrutura de Pastas
+## 🏗️ Arquitetura
+
+| Camada | Responsabilidade | Principais arquivos |
+|---|---|---|
+| Core | Configurações, temas, DI | `lib/core/di/injector.dart`, `core/config/*` |
+| Data (Weather) | Data sources HTTP e mock | `data/datasources/*`, `data/services/api_http_client_service.dart` |
+| Data (Marine) | Serviço Open‑Meteo + repositório | `data/services/open_meteo_api_service.dart`, `data/repositories/marine_repository_impl.dart` |
+| Domain | Models e use cases | `domain/models/*`, `domain/usecases/*` |
+| UI | Controllers, views e widgets | `ui/controllers/*`, `ui/views/*`, `ui/widgets/*` |
+
+---
+
+## 📂 Estrutura
 
 ```
 lib/
-  core/            # Configurações, temas, padrões e erros
-  data/            # Serviços HTTP e repositórios
-  domain/          # Models e use cases
-  ui/              # Views, controllers, widgets e commands
-  main.dart        # Ponto de entrada
+  core/di/injector.dart
+  data/
+    datasources/               # Weather API remote + mock
+    repositories/marine_repository_impl.dart
+    services/{api_http_client_service,marine_api_service,open_meteo_api_service}.dart
+  domain/
+    models/{current_weather,forecast,marine_models}.dart
+    repositories/marine_repository.dart
+    usecases/{get_current_weather_usecase,get_forecast_usecase,search_locations_usecase,
+              get_marine_hours_usecase,get_tide_extremes_usecase}.dart
+  ui/
+    controllers/{weather_home_view_controller,surf_fish_controller}.dart
+    views/weather_home_page.dart
+    widgets/{current_weather_card,weather_detail_card,forecast_list,weather_search_bar,
+             surf_fish_panel}.dart
 ```
 
 ---
 
-## 📦 Dependências Principais
+## 🔧 Configuração e Execução
 
-- `auto_injector` – Injeção de dependências  
-- `http` – Requisições REST  
-- `signals_flutter` – Estado reativo baseado em signals  
-- `google_fonts`, `cupertino_icons` – UI e tipografia  
+| Variável | Uso | Exemplo |
+|---|---|---|
+| `WEATHER_API_KEY` | Chave da WeatherAPI | `--dart-define=WEATHER_API_KEY=SEU_TOKEN` |
+| `USE_MOCK` | Mock para clima (true/false) | `--dart-define=USE_MOCK=true` |
 
-*(consulte o `pubspec.yaml` para a lista completa)*
-
----
-
-## 🔑 Chave e documentação da WeatherAPI
-
-1. Crie uma conta gratuita em [WeatherAPI](https://www.weatherapi.com/signup.aspx) e gere sua chave.
-2. Explore os endpoints no [API Explorer](https://www.weatherapi.com/api-explorer.aspx) ou consulte a [documentação/Swagger](https://www.weatherapi.com/docs/).
-
-A chave é lida em tempo de execução via `--dart-define=WEATHER_API_KEY` no arquivo [`ApiConfig`](lib/core/config/api_config.dart).
-
----
-
-## ▶️ Como Executar
-
-1. Instale o **Flutter SDK** (versão compatível com `sdk: ^3.7.2`).
-2. Na raiz do projeto, rode:
+Comandos rápidos:
 
 ```bash
 flutter pub get
-flutter run --dart-define=WEATHER_API_KEY=SEU_TOKEN --dart-define=USE_MOCK=false
+# Web
+flutter run -d chrome --dart-define=WEATHER_API_KEY=SEU_TOKEN
+# Mock do clima
+flutter run -d chrome --dart-define=WEATHER_API_KEY=SEU_TOKEN --dart-define=USE_MOCK=true
 ```
 
-> Use `--dart-define=USE_MOCK=true` para testar com os dados estáticos.
+Notas:
+- 🌊 A aba Surf/Pesca usa Open‑Meteo — sem chave e sem proxy.
+- 📍 Cidade inicial: “Matinhos, PR” (altere em `lib/ui/controllers/weather_home_view_controller.dart`).
 
 ---
 
-## 🎨 Funcionalidades de UI
+## 🌊 Aba Surf/Pesca
 
-- **WeatherSearchBar** → Campo de busca com indicador de carregamento.  
-- **CurrentWeatherCard** → Exibe temperatura, condição e descrição.  
-- **WeatherDetailsCard** → Mostra pressão, umidade, vento etc.  
-- **ForecastList** → Lista previsões diárias para cinco dias.  
+- Serviço: `OpenMeteoApiService` combina dois endpoints (Marine + Forecast) e adapta para `MarineHour`.
+- Marés: `getTideExtremes` lê lista de extremos quando disponível; caso contrário, deriva por máximos/mínimos da série de altura.
+- Janelas ideais (heurística):
+
+| Atividade | Critério | Pontos |
+|---|---|---|
+| Surf | Período ≥ 8 s | +1 |
+| Surf | Altura de swell 0.8–2.2 m | +1 |
+| Surf | Vento ≤ 8 m/s | +1 |
+| Pesca | Vento ≤ 6 m/s | +1 |
+| Pesca | Ondas ≤ 1.5 m | +1 |
+| Pesca | Próximo de extremo de maré (±90 min) | +2 |
+
+- Limiar de exibição:
+  - Surf: ≥ 3
+  - Pesca: ≥ 3 (ou ≥ 2 quando não houver dados de maré)
+- UI: cards com gradiente azul, chips de maré e carrossel horizontal de janelas.
+- Mensagens i18n: ausência de maré/janelas é comunicada de forma amigável.
 
 ---
 
-## 🚧 Pendências
+## 🔤 Internacionalização (l10n)
 
-- Adicionar testes unitários e de widget.
-- Configurar `flutter analyze` e `flutter test` em pipeline de CI.
-- Documentar geração de arquivos de internacionalização (l10n).
-- Completar documentação da aba de surf/pesca.
+Chaves relevantes: `noMarineData`, `noTideData`, `noWindows`, além de `currentConditions`, `wave`, `swell`, `water` etc. Arquivos em `lib/l10n`.
 
 ---
 
-## 📜 Licença
+## 🧩 Dependências
 
-Este projeto é de uso livre para **estudos**.  
-Substitua os dados da API e ajuste conforme sua necessidade.
+| Pacote | Finalidade |
+|---|---|
+| auto_injector | Injeção de dependências |
+| http | Requisições REST |
+| signals_flutter | Estado reativo com signals |
+| flutter_localizations | i18n pt‑BR |
 
+Consulte o `pubspec.yaml` para a lista completa.
 
+---
+
+## 🧭 Boas Práticas e Roadmap
+
+- ✅ Camadas e contratos bem definidos (Service → Repository → Use Cases → Controller → UI)
+- ✅ Controllers enxutos; lógica de cálculo isolada
+- ✅ Tratamento resiliente de erros/4xx no marinho
+- ✅ DI centralizada e testável
+
+---
+
+## 📝 Licença
+
+Projeto para estudos. Use e adapte conforme sua necessidade.
