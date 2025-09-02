@@ -15,13 +15,13 @@ class ForecastList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Watch((_) {
-      final state = controller.forecastState.value;
+      final isLoading = controller.forecastLoading.value;
       final l10n = AppLocalizations.of(context);
-      if (state.isLoading) {
+      if (isLoading) {
         return const Center(child: CircularProgressIndicator());
       }
-      if (state.error != null) {
-        final err = state.error!;
+      if (controller.forecastError.value != null) {
+        final err = controller.forecastError.value!;
         String message = err.toString();
         if (err is AppException) {
           message = '${l10n.errorPrefix} ${err.userMessage}';
@@ -37,7 +37,7 @@ class ForecastList extends StatelessWidget {
           ],
         );
       }
-      final forecast = state.data;
+      final forecast = controller.forecast.value;
       if (forecast == null) return const SizedBox.shrink();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,

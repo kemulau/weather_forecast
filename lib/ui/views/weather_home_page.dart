@@ -1,15 +1,12 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:signals_flutter/signals_flutter.dart';
 import 'package:weather_app/core/di/injector.dart';
 import 'package:weather_app/l10n/app_localizations.dart';
-import 'package:weather_app/data/services/marine_api_service.dart';
 import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
 import 'package:weather_app/ui/widgets/current_weather_card.dart';
 import 'package:weather_app/ui/widgets/forecast_list.dart';
-import 'package:weather_app/ui/widgets/surf_fish_panel.dart';
 import 'package:weather_app/ui/widgets/weather_detail_card.dart';
 import 'package:weather_app/ui/widgets/weather_search_bar.dart';
+import 'package:weather_app/ui/views/surf_fish_tab.dart';
 
 class WeatherHomePage extends StatefulWidget {
   const WeatherHomePage({super.key, required this.title});
@@ -23,26 +20,19 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
   late WeatherHomeViewController _viewController;
   // Controller para campo de busca
   final searchController = TextEditingController();
-  Timer? _autoTimer;
 
   @override
   void initState() {
     super.initState();
     _viewController = injector.get<WeatherHomeViewController>();
-    _viewController.loadCurrent();
-    _viewController.loadForecast();
-
-    // Atualização automática a cada 30 minutos
-    _autoTimer?.cancel();
-    _autoTimer = Timer.periodic(const Duration(minutes: 30), (_) async {
-      await _viewController.loadCurrent();
-      await _viewController.loadForecast();
-    });
+    // Carrega dados iniciais e agenda atualização automática no controller
+    _viewController.refresh();
+    _viewController.startAutoRefresh();
   }
 
   @override
   void dispose() {
-    _autoTimer?.cancel();
+    _viewController.stopAutoRefresh();
     searchController.dispose();
     super.dispose();
   }
@@ -60,9 +50,8 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
         ),
       );
 
-      _viewController.city.value = cityName;
-      await _viewController.loadCurrent();
-      await _viewController.loadForecast();
+      _viewController.setCity(cityName);
+      await _viewController.refresh();
       searchController.clear();
     }
   }
@@ -71,10 +60,7 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
     return SafeArea(
       // use refresh indicator para permitir que o usuário atualize os dados puxando para baixo
       child: RefreshIndicator(
-        onRefresh: () async {
-          await _viewController.loadCurrent();
-          await _viewController.loadForecast();
-        },
+        onRefresh: () => _viewController.refresh(),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
@@ -118,35 +104,11 @@ class _WeatherHomePageState extends State<WeatherHomePage> {
         body: TabBarView(
           children: [
             _buildWeatherTab(),
-            Watch((context) {
-              final state = _viewController.currentState.value;
-              if (state.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              final weather = state.data;
-              if (weather == null) {
-                return const SizedBox.shrink();
-              }
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                    child: WeatherSearchBar(
-                      controller: searchController,
-                      viewController: _viewController,
-                      onSearch: _onSearch,
-                    ),
-                  ),
-                  Expanded(
-                    child: SurfFishPanel(
-                      lat: weather.lat,
-                      lng: weather.lon,
-                    ),
-                  ),
-                ],
-              );
-            }),
+            SurfFishTab(
+              controller: _viewController,
+              searchController: searchController,
+              onSearch: _onSearch,
+            ),
           ],
         ),
       ),

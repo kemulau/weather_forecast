@@ -1,7 +1,6 @@
 import 'package:weather_app/domain/models/marine_models.dart';
 import 'package:weather_app/domain/usecases/get_marine_hours_usecase.dart';
 import 'package:weather_app/domain/usecases/get_tide_extremes_usecase.dart';
-import 'package:weather_app/domain/models/marine_models.dart';
 
 class SurfFishWindow {
   final DateTime start;
@@ -17,11 +16,11 @@ class SurfFishWindow {
   });
 }
 
-class SurfFishController {
+class SurfFishService {
   final GetMarineHoursUseCase _getMarineHours;
   final GetTideExtremesUseCase _getTideExtremes;
 
-  SurfFishController(
+  SurfFishService(
     this._getMarineHours,
     this._getTideExtremes,
   );

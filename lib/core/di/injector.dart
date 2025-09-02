@@ -15,6 +15,7 @@ import 'package:weather_app/domain/usecases/get_current_weather_usecase.dart';
 import 'package:weather_app/domain/usecases/get_forecast_usecase.dart';
 import 'package:weather_app/domain/usecases/search_locations_usecase.dart';
 import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
+import 'package:weather_app/domain/services/surf_fish_service.dart';
 
 final injector = AutoInjector();
 
@@ -28,6 +29,12 @@ void initInjector() {
   );
   injector.addSingleton(GetMarineHoursUseCase.new);
   injector.addSingleton(GetTideExtremesUseCase.new);
+  injector.addSingleton<SurfFishService>(
+    () => SurfFishService(
+      injector.get<GetMarineHoursUseCase>(),
+      injector.get<GetTideExtremesUseCase>(),
+    ),
+  );
 
   injector.addSingleton<WeatherRemoteDataSource>(
       WeatherApiRemoteDataSource.new);
@@ -52,6 +59,7 @@ void initInjector() {
       getCurrentWeatherUseCase: injector.get<GetCurrentWeatherUseCase>(),
       getForecastUseCase: injector.get<GetForecastUseCase>(),
       searchLocationsUseCase: injector.get<SearchLocationsUseCase>(),
+      surfFishController: injector.get<SurfFishService>(),
     ),
   );
 

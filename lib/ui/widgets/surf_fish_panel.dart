@@ -1,52 +1,14 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:weather_app/core/di/injector.dart';
-import 'package:weather_app/domain/usecases/get_marine_hours_usecase.dart';
-import 'package:weather_app/domain/usecases/get_tide_extremes_usecase.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 import 'package:weather_app/domain/models/marine_models.dart';
+import 'package:weather_app/domain/services/surf_fish_service.dart';
 import 'package:weather_app/l10n/app_localizations.dart';
-import 'package:weather_app/ui/controllers/surf_fish_controller.dart';
+import 'package:weather_app/ui/controllers/weather_home_view_controller.dart';
 
-class SurfFishPanel extends StatefulWidget {
-  final double lat;
-  final double lng;
+class SurfFishPanel extends StatelessWidget {
+  final WeatherHomeViewController controller;
 
-  const SurfFishPanel({
-    super.key,
-    required this.lat,
-    required this.lng,
-  });
-
-  @override
-  State<SurfFishPanel> createState() => _SurfFishPanelState();
-}
-
-class _SurfFishPanelState extends State<SurfFishPanel> {
-  late final SurfFishController _controller;
-  late Future<(
-    List<MarineHour>,
-    List<TideExtreme>,
-    List<SurfFishWindow>,
-  )> _future;
-  Timer? _autoTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = SurfFishController(
-      injector.get<GetMarineHoursUseCase>(),
-      injector.get<GetTideExtremesUseCase>(),
-    );
-    _future = _controller.load(widget.lat, widget.lng);
-    _autoTimer = Timer.periodic(const Duration(minutes: 30), (_) => _refresh());
-  }
-
-  Future<void> _refresh() async {
-    setState(() {
-      _future = _controller.load(widget.lat, widget.lng);
-    });
-    await _future;
-  }
+  const SurfFishPanel({super.key, required this.controller});
 
   String _formatTime(DateTime time) {
     final t = time.toLocal();
@@ -56,28 +18,19 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final content = FutureBuilder<(
-      List<MarineHour>,
-      List<TideExtreme>,
-      List<SurfFishWindow>,
-    )>(
-      future: _future,
-      builder: (context, snapshot) {
-        final l10n = AppLocalizations.of(context);
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('${l10n.errorPrefix} ${snapshot.error}'));
-        }
-        if (!snapshot.hasData) {
-          return const SizedBox.shrink();
-        }
-        final (
-          List<MarineHour> hours,
-          List<TideExtreme> tides,
-          List<SurfFishWindow> windows,
-        ) = snapshot.data!;
+    final content = Watch((context) {
+      final l10n = AppLocalizations.of(context);
+      if (controller.marineLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      if (controller.marineError.value != null) {
+        return Center(
+            child:
+                Text('${l10n.errorPrefix} ${controller.marineError.value}'));
+      }
+      final List<MarineHour> hours = controller.marineHours.value;
+      final List<TideExtreme> tides = controller.tideExtremes.value;
+      final List<SurfFishWindow> windows = controller.surfFishWindows.value;
 
         if (hours.isEmpty && tides.isEmpty) {
           return Center(
@@ -94,7 +47,7 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
         final MarineHour? current = hours.isNotEmpty ? hours.first : null;
         final scheme = Theme.of(context).colorScheme;
 
-        return Column(
+      return Column(
           children: [
             // Header com gradiente e cards compactos
             Container(
@@ -264,23 +217,21 @@ class _SurfFishPanelState extends State<SurfFishPanel> {
                 ),
               ),
           ],
-        );
-      },
-    );
+      );
+    });
 
     return RefreshIndicator(
-      onRefresh: _refresh,
+      onRefresh: () async {
+        final cw = controller.current.value;
+        if (cw != null) {
+          await controller.loadMarine(cw.lat, cw.lon);
+        }
+      },
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         child: content,
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _autoTimer?.cancel();
-    super.dispose();
   }
 }
 

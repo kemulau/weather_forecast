@@ -15,13 +15,13 @@ class WeatherDetailsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Watch((_) {
-      final state = controller.currentState.value;
+      final isLoading = controller.currentLoading.value;
       final l10n = AppLocalizations.of(context);
-      if (state.isLoading) {
+      if (isLoading) {
         return const Center(child: CircularProgressIndicator());
       }
-      if (state.error != null) {
-        final err = state.error!;
+      if (controller.currentError.value != null) {
+        final err = controller.currentError.value!;
         String message = err.toString();
         if (err is AppException) {
           message = '${l10n.errorPrefix} ${err.userMessage}';
@@ -37,7 +37,7 @@ class WeatherDetailsCard extends StatelessWidget {
           ],
         );
       }
-      final weather = state.data;
+      final weather = controller.current.value;
       if (weather == null) return const SizedBox.shrink();
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
